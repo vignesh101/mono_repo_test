@@ -8,7 +8,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        System.out.println(processString("Github Mono Repo"));
+        System.out.println(processString("Github Mono Repo Service A"));
     }
 
     public static String processString(String input) {
