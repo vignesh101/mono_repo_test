@@ -14,7 +14,7 @@ jobs:
       service_a: ${{ steps.filter.outputs.service_a }}
       service_b: ${{ steps.filter.outputs.service_b }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
         id: filter
         with:
@@ -22,11 +22,11 @@ jobs:
             common:
               - 'common/**'
               - 'pom.xml'
-            service-a:
+            service_a:
               - 'service_a/**'
               - 'common/**'
               - 'pom.xml'
-            service-b:
+            service_b:
               - 'service_b/**'
               - 'common/**'
               - 'pom.xml'
@@ -62,7 +62,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Build service-a
-        run: mvn clean install -pl service-a -am
+        run: mvn clean install -pl service_a -am
       - name: Upload service-a artifact
         uses: actions/upload-artifact@v3
         with:
@@ -81,7 +81,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Build service-b
-        run: mvn clean install -pl service-b -am
+        run: mvn clean install -pl service_b -am
       - name: Upload service-b artifact
         uses: actions/upload-artifact@v3
         with:
