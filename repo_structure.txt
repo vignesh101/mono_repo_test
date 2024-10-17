@@ -1,0 +1,49 @@
+monorepo-java-project/
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml
+├── common/
+│   ├── src/
+│   │   ├── main/
+│   │   │   └── java/
+│   │   │       └── org/
+│   │   │           └── example/
+│   │   │               └── StringUtils.java
+│   │   └── test/
+│   │       └── java/
+│   │           └── com/
+│   │               └── example/
+│   │                   └── common/
+│   │                       └── StringUtilsTest.java
+│   └── pom.xml
+├── service-a/
+│   ├── src/
+│   │   ├── main/
+│   │   │   └── java/
+│   │   │       └── org/
+│   │   │           └── example/
+│   │   │               └── App.java
+│   │   └── test/
+│   │       └── java/
+│   │           └── com/
+│   │               └── example/
+│   │                   └── servicea/
+│   │                       └── ServiceATest.java
+│   └── pom.xml
+├── service-b/
+│   ├── src/
+│   │   ├── main/
+│   │   │   └── java/
+│   │   │       └── org/
+│   │   │           └── example/
+│   │   │               └── App.java
+│   │   └── test/
+│   │       └── java/
+│   │           └── com/
+│   │               └── example/
+│   │                   └── serviceb/
+│   │                       └── ServiceBTest.java
+│   └── pom.xml
+├── .gitignore
+├── pom.xml
+└── README.md

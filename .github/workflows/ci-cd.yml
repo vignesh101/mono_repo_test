@@ -1,0 +1,134 @@
+name: Java Monorepo CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      common: ${{ steps.filter.outputs.common }}
+      service_a: ${{ steps.filter.outputs.service_a }}
+      service_b: ${{ steps.filter.outputs.service_b }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            common:
+              - 'common/**'
+              - 'pom.xml'
+            service-a:
+              - 'service_a/**'
+              - 'common/**'
+              - 'pom.xml'
+            service-b:
+              - 'service_b/**'
+              - 'common/**'
+              - 'pom.xml'
+
+  build-common:
+    needs: changes
+    if: ${{ needs.changes.outputs.common == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Build common
+        run: mvn clean install -pl common -am
+      - name: Upload common artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: common
+          path: common/target/*.jar
+
+  build-service-a:
+    needs: changes
+    if: ${{ needs.changes.outputs.service_a == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Build service-a
+        run: mvn clean install -pl service-a -am
+      - name: Upload service-a artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: service_a
+          path: service_a/target/*.jar
+
+  build-service-b:
+    needs: changes
+    if: ${{ needs.changes.outputs.service_b == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Build service-b
+        run: mvn clean install -pl service-b -am
+      - name: Upload service-b artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: service_b
+          path: service_b/target/*.jar
+
+  test:
+    needs: [changes, build-common, build-service-a, build-service-b]
+    if: ${{ needs.changes.outputs.common == 'true' || needs.changes.outputs.service_a == 'true' || needs.changes.outputs.service_b == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+      - name: Run tests
+        run: |
+          if [ "${{ needs.changes.outputs.common }}" == "true" ]; then
+            mvn test -pl common
+          fi
+          if [ "${{ needs.changes.outputs.service_a }}" == "true" ]; then
+            mvn test -pl service_a
+          fi
+          if [ "${{ needs.changes.outputs.service_b }}" == "true" ]; then
+            mvn test -pl service_b
+          fi
+
+  deploy:
+    needs: [changes, test]
+    if: ${{ github.ref == 'refs/heads/main' && (needs.changes.outputs.common == 'true' || needs.changes.outputs.service_a == 'true' || needs.changes.outputs.service_b == 'true') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production..."
+          if [ "${{ needs.changes.outputs.common }}" == "true" ]; then
+            echo "Deploying common library..."
+          fi
+          if [ "${{ needs.changes.outputs.service_a }}" == "true" ]; then
+            echo "Deploying service-a..."
+          fi
+          if [ "${{ needs.changes.outputs.service_b }}" == "true" ]; then
+            echo "Deploying service-b..."
+          fi
